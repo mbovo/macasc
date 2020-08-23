@@ -1,0 +1,120 @@
+  # - name: VsCode
+  #   install:
+  #     - name: download
+  #       src: "{{vscode_url}}"
+  #       dest: "{{vscode_tmp_file}}"
+  #     - name: unzip
+  #       src: "{{vscode_tmp_file}}"
+  #       dest:  /tmp
+  #     - name: move
+  #       src: /tmp/Visual Studio Code.app
+  #       dest: "{{vscode_app_dest}}"
+  #     # - name: link
+  #     #   src: /Applications/Visual Studio Code.app/Contents/Resources/app/bin/code
+  #     #   dest: "{{vscode_code_path}}"
+  #     - name: remove
+  #       args: 
+  #         - "{{vscode_tmp_file}}"
+  #   uninstall: 
+  #     - name: remove
+  #       args:
+  #         - "{{vscode_app_dest}}"
+  #         # - "{{vscode_code_path}}"
+  #   verify:
+  #     - name: exec
+  #       args: [ "{{vscode_code_path}}" ]
+  #   configure:
+  #     - name: vscodePlugin
+  #       args:
+  #         - ZainChen.json
+  #         - bbenoist.vagrant
+  # - name: HomeBrew
+  #   install:
+  #     - name: download
+  #       src: "{{brew_url}}"
+  #       dest: /tmp/homebrew.sh
+  #     - name: exec
+  #       args: 
+  #         - /tmp/homebrew.sh
+  #     - name: remove
+  #       args: 
+  #         - /tmp/homebrew.sh
+  #     - name: configure
+  #   uninstall: 
+  #     - name: brewFormula
+  #       args:
+  #         - uninstall
+  #         - asciinema
+  #         - unrar
+  #         - terragrunt
+  #         - terraform
+  #         - helm
+  #   verify:
+  #     - name: exists
+  #       args: 
+  #         - "/usr/local/bin/brew"
+  #   configure:
+  #     - name: brewFormula
+  #       args: 
+  #         - "{{ brew_packages }}"
+...
+
+
+# brew:
+#   formulae:
+#   - asciinema
+#   - unrar
+#   - terraform
+#   - helm
+# vscode:
+#   plugins:
+#     - 0x9ef.vscode-vlang
+#     - ahebrank.yaml2json
+#     - bbenoist.vagrant
+#     - bodil.prettier-toml
+#     - bongnv.go-custom-format
+#     - bungcip.better-toml
+#     - codezombiech.gitignore
+#     - connorshea.vscode-test-explorer-status-bar
+#     - coolbear.systemd-unit-file
+#     - DavidAnson.vscode-markdownlint
+#     - donjayamanne.githistory
+#     - drewbourne.vscode-remark-lint
+#     - eamodio.gitlens
+#     - esbenp.prettier-vscode
+#     - felipecaputo.git-project-manager
+#     - felixrieseberg.vsc-travis-ci-status
+#     - formulahendry.github-actions
+#     - GitHub.vscode-pull-request-github
+#     - golang.Go
+#     - hashicorp.terraform
+#     - hbenl.vscode-test-explorer
+#     - jmMeessen.jenkins-declarative-support
+#     - lextudio.restructuredtext
+#     - littlefoxteam.vscode-python-test-adapter
+#     - magicstack.MagicPython
+#     - marcostazi.VS-code-vagrantfile
+#     - marlon407.code-groovy
+#     - ms-azuretools.vscode-docker
+#     - ms-kubernetes-tools.vscode-kubernetes-tools
+#     - ms-python.python
+#     - ms-vscode.cpptools
+#     - msyrus.go-doc
+#     - neverik.go-critic
+#     - NicolasVuillamy.vscode-groovy-lint
+#     - PKief.material-icon-theme
+#     - premparihar.gotestexplorer
+#     - quicktype.quicktype
+#     - redhat.vscode-yaml
+#     - secanis.jenkinsfile-support
+#     - Shan.code-settings-sync
+#     - sourcegraph.sourcegraph
+#     - streetsidesoftware.code-spell-checker
+#     - streetsidesoftware.code-spell-checker-italian
+#     - TabNine.tabnine-vscode
+#     - tht13.html-preview-vscode
+#     - tomsaunders.vscode-workspace-explorer
+#     - vsciot-vscode.vscode-arduino
+#     - vscoss.vscode-ansible
+#     - yzane.markdown-pdf
+#     - ZainChen.json
