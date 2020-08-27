@@ -1,53 +1,44 @@
 package v1
 
 import (
-	"strings"
+  "strings"
 
-	"github.com/mbovo/yacasc/v1/internal"
+  "github.com/mbovo/yacasc/v1/internal"
 )
 
 
 func Brew(c *Command) Result {
 
-	if e := internal.VerifyRequiredArgs(c.Name,[]string{"args", "cmd"}, c.args); e != nil {
-		return Result{Type: ERROR, Error: e}
-	}
+  cmd, r := GetStringArgument(c, "cmd")
+  if r != nil { return *r}
+  args, r := GetStringArrayArgument(c, "args")
 
-	argsInt := c.args["args"].([]interface{})
+  retVal := Result{Type: CHANGED}
 
-	brewArgs := make([]string,0)
-	for _, i := range argsInt{
-		brewArgs = append(brewArgs, i.(string))
-	}
+  //TODO: return stderr and stdout content and write it to retVal.Info
+  if err := BrewAction(strings.ToLower(cmd), args, c.callback); err != nil {
+    retVal.Error = err
+    retVal.Type = ERROR
+  }
 
-	cmd := c.args["cmd"].(string)
-
-	retVal := Result{Type: CHANGED}
-
-	//TODO: return stderr and stdout content and write it to retVal.Info
-	if err := BrewAction(strings.ToLower(cmd), brewArgs, c.callback); err != nil {
-		retVal.Error = err
-		retVal.Type = ERROR
-	}
-
-	return retVal
+  return retVal
 }
 
 func BrewAction(command string, list []string, callback OutputCallback ) error {
 
-	brewBin, ok := internal.ExistsInPath("brew")
-	if !ok {
-		//trying without abs location
-		brewBin = "brew"
-	}
+  brewBin, ok := internal.ExistsInPath("brew")
+  if !ok {
+    //trying without abs location
+    brewBin = "brew"
+  }
 
-	for _, formula := range list {
-		callback.Output("%s", formula)
-		if _, err := internal.Exec(true, brewBin, command, formula ); err != nil {
-			return err
-		}
-	}
-	return nil
+  for _, formula := range list {
+    callback.Output("%s", formula)
+    if _, err := internal.Exec(true, brewBin, command, formula ); err != nil {
+      return err
+    }
+  }
+  return nil
 }
 //
 //func preFetch(formule []string) (int, error) {

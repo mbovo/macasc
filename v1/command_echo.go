@@ -1,29 +1,24 @@
 package v1
 
 import (
-	"fmt"
-	"strings"
-
-	"github.com/mbovo/yacasc/v1/internal"
+  "fmt"
+  "strings"
 )
 
 func Echo(c *Command) Result {
 
-	if e := internal.VerifyRequiredArgs(c.Name, []string{"args"}, c.args); e != nil {
-		return Result{Type: ERROR, Error: e}
-	}
+  args, r := GetStringArrayArgument(c, "args")
+  if r != nil { return *r }
 
-	args := c.args["args"]
+  retVal := Result{Type: OK}
+  builder := strings.Builder{}
 
-	retVal := Result{Type: OK}
-	builder := strings.Builder{}
-
-	for _, arg := range args.([]interface{}) {
-		if arg != nil {
-			builder.WriteString(fmt.Sprintf("%s\n", arg.(string)))
-		}
-	}
-	retVal.Message = builder.String()
-	return retVal
+  for _, arg := range args {
+    if arg != "" {
+      builder.WriteString(fmt.Sprintf("%s\n", arg))
+    }
+  }
+  retVal.Message = builder.String()
+  return retVal
 
 }
