@@ -1,32 +1,32 @@
 package v1
 
 import (
-	"errors"
+  "errors"
 )
 
 func SetVars(c *Command) Result {
 
-	retVal := Result{Type: OK}
+  retVal := Result{Type: OK}
 
-	args, ok := c.args["vars"].(map[interface{}]interface{})
+  args, ok := c.args["vars"].(map[interface{}]interface{})
 
-	if !ok {
-		retVal.Error = errors.New("invalid or empty args given")
-		retVal.Type = ERROR
-		return retVal
-	}
+  if !ok {
+    retVal.Error = errors.New("invalid or empty args given")
+    retVal.Type = ERROR
+    return retVal
+  }
 
-	for k, v := range args{
-		c.vars[k.(string)] = v
-	}
+  for k, v := range args{
+    c.vars[k.(string)] = v
+  }
 
-	return retVal
+  return retVal
 }
 
 func PrintVars(c *Command) Result {
 
-	retVal := Result{Type: OK}
-	retVal.Info = c.vars
+  retVal := Result{Type: OK}
+  retVal.Info = c.vars
 
-	return retVal
+  return retVal
 }

@@ -1,12 +1,13 @@
 package v1
 
 import (
-	"fmt"
-	"os"
-	"path"
-	"path/filepath"
+  "fmt"
+  "os"
+  "path"
+  "path/filepath"
+  "strconv"
 
-	"github.com/mbovo/yacasc/v1/internal"
+  "github.com/mbovo/yacasc/v1/internal"
 )
 
 // Download command will try to download the src to the dest file
@@ -16,39 +17,42 @@ import (
 //	mode: uint32 optional dest fileMode
 func Download(c *Command) Result {
 
-	if e := internal.VerifyRequiredArgs(c.Name, []string{"src","dest"}, c.args); e != nil {
-		return Result{Type: ERROR, Error: e}
-	}
+  src, r := GetStringArgument(c, "src")
+  if r != nil { return *r }
+  dest, r := GetStringArgument(c, "dest")
+  if r != nil { return *r }
 
-	src := c.args["src"]
-	dest := c.args["dest"]
-	mode, ok := c.args["mode"]
-	if !ok {
-		mode = os.ModePerm
-	}
+  var mode os.FileMode
+  m, r := GetStringArgument(c, "mode")
+  if r != nil {
+    mode = os.ModePerm
+  }else{
+    i, _ := strconv.Atoi(m)
+    mode = os.FileMode(i)
+  }
 
-	retVal := Result{Type: OK}
+  retVal := Result{Type: OK}
 
-	info, err := os.Stat(dest.(string))
-	if err == nil {
-		// file exists
-		if info.IsDir() {
-			// target exist and is a directory, append the file name and use it as destination
-			dest = filepath.Join(dest.(string), path.Base(src.(string)))
-		}
-	} else {
-		if os.IsNotExist(err) {
-			// ok file does not exists, start download
-			if e := internal.DownloadToFile(src.(string), dest.(string), mode.(os.FileMode)); e != nil {
-				retVal.Type = ERROR
-				retVal.Error = e
-			}
-			retVal.Type = CHANGED
-			retVal.Message = fmt.Sprintf("Downloaded %s -> %s", src, dest)
-		} else {
-			retVal.Type = ERROR
-			retVal.Error = err
-		}
-	}
-	return retVal
+  info, err := os.Stat(dest)
+  if err == nil {
+    // file exists
+    if info.IsDir() {
+      // target exist and is a directory, append the file name and use it as destination
+      dest = filepath.Join(dest, path.Base(src))
+    }
+  } else {
+    if os.IsNotExist(err) {
+      // ok file does not exists, start download
+      if e := internal.DownloadToFile(src, dest, mode); e != nil {
+        retVal.Type = ERROR
+        retVal.Error = e
+      }
+      retVal.Type = CHANGED
+      retVal.Message = fmt.Sprintf("Downloaded %s -> %s", src, dest)
+    } else {
+      retVal.Type = ERROR
+      retVal.Error = err
+    }
+  }
+  return retVal
 }

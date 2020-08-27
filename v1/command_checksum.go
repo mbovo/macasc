@@ -1,52 +1,51 @@
 package v1
 
 import (
-	"github.com/mbovo/yacasc/v1/internal"
+  "github.com/mbovo/yacasc/v1/internal"
 )
 
-func Hashfile(c *Command) Result {
+func Hashfile(c *Command) ( res Result) {
 
-	if e := internal.VerifyRequiredArgs(c.Name, []string{"args"}, c.args); e != nil {
-		return Result{Type: ERROR, Error: e}
-	}
+  // Load command arguments
+  args, result := GetStringArrayArgument(c, "args")
+  if result != nil { return *result }
 
-	args := c.args["args"]
+  vars, _ := GetArgumentFromVars(c)
 
-	retVal := Result{Type: OK}
+  args = append(args, vars...)
 
-	info := make(map[string]interface{})
+  // Prepare returned values
+  res.Type = OK
+  info := make(map[string]interface{})
 
-	for _, path := range args.([]interface{}) {
-		if path == nil { continue }
-		h, e := internal.SHA256File(path.(string))
-		if e != nil {
-			retVal.Error = e
-			retVal.Type = ERROR
-			info[path.(string)] = e.Error()
-		}
-		info[path.(string)] = h
-	}
-	retVal.Info = info
-	return retVal
-
+  // Calculate SHA256 for each filename
+  for _, path := range args {
+    if path == "" { continue }
+    h, e := internal.SHA256File(path)
+    if e != nil {
+      res.Error = e
+      res.Type = ERROR
+      info[path] = e.Error()
+    }
+    info[path] = h
+  }
+  res.Info = info
+  return
 }
 
 func HashString(c *Command) Result {
 
-	if e := internal.VerifyRequiredArgs(c.Name, []string{"args"}, c.args); e != nil {
-		return Result{Type: ERROR, Error: e}
-	}
+  args, res := GetStringArrayArgument(c, "args")
+  if res!=nil{ return *res}
 
-	args := c.args["args"]
+  retVal := Result{Type: OK}
 
-	retVal := Result{Type: OK}
+  info := make(map[string]interface{})
 
-	info := make(map[string]interface{})
-
-	for _, str := range args.([]interface{}) {
-		h := internal.SHA256String(str.(string))
-		info[str.(string)] = h
-	}
-	retVal.Info = info
-	return retVal
+  for _, str := range args {
+    h := internal.SHA256String(str)
+    info[str] = h
+  }
+  retVal.Info = info
+  return retVal
 }
