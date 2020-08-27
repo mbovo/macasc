@@ -1,0 +1,7 @@
+- name: TestEcho
+  verify:
+  - name: echo
+    msg: Hallo World
+    args: 
+    - My Name
+    - is yacasc
