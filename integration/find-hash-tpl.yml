@@ -1,0 +1,13 @@
+- name: step1
+  verify:
+    - name: find
+      path: /etc/
+      pattern: "motd"
+      result: fileList
+    - name: hashFile
+      args: []
+      fromVar: fileList
+      result: myvar
+    - name: template
+      src: ../resources/template.yml
+      dest: /tmp/file

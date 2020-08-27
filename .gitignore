@@ -1,7 +1,6 @@
 # custom
 old/*
 resources/*
-*.yml
 coverage.html
 
 # Binaries for programs and plugins
