@@ -1,8 +1,8 @@
 - name: step1
   verify:
     - name: find
-      path: /etc/
-      pattern: "motd"
+      path: ./
+      pattern: ".sh$"
       result: fileList
     - name: hashFile
       args: []

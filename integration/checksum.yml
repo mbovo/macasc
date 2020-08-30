@@ -1,0 +1,9 @@
+- name: TestChecksum
+  verify:
+    - name: hash
+      args: ["Hallo World"]
+    - name: hashfile
+      args:
+        - ./checksum.yml
+    - name: hash
+      args: this is an error
