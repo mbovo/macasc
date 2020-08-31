@@ -22,8 +22,6 @@ const (
   SKIPPED ResultType = "SKIPPED"
 )
 
-type args map[string]interface{}
-
 type Command struct {
   // Name of the command
   Name    string
@@ -40,7 +38,7 @@ type Command struct {
   // Vars injected from executor
   vars    map[string]interface{}
   // command arguments from file
-  args
+  args    map[string]interface{}
   // output callback from executor
   callback OutputCallback
 

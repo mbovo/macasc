@@ -1,9 +1,5 @@
 package v1
 
-import (
-  "fmt"
-)
-
 // Keep track of current execution
 //	VarFile is the vars filename (can be a remote url)
 //	StepsFile is the steps filename ( can be a remote url)
@@ -68,32 +64,36 @@ func (ex Executor) Run(action Action) (err error) {
     ex.callback.Output("Step %d/%d: %s\n", i+1, tot, step.Name)
 
     switch action {
-    case Verify:
-      err = step.Run(ex, "Verify", step.VerifyCommands)
-      if err != nil {
-        return
-      }
-      break
-    case Apply:
-      err = step.Run(ex, "Add", step.AddCommands)
-      if err != nil {
-        return
-      }
-      break
-    case Configure:
-      err = step.Run(ex, "Configure", step.ConfigureCommands)
-      if err != nil {
-        return
-      }
-      break
-    case Remove:
-      err = step.Run(ex, "Remove", step.RemoveCommands)
-      if err != nil {
-        return
-      }
-      break
+    //case Verify:
+    //  err = step.Run(ex, "Verify", step.VerifyCommands)
+    //  if err != nil {
+    //    return
+    //  }
+    //  break
+    //case Apply:
+    //  err = step.Run(ex, "Add", step.AddCommands)
+    //  if err != nil {
+    //    return
+    //  }
+    //  break
+    //case Configure:
+    //  err = step.Run(ex, "Configure", step.ConfigureCommands)
+    //  if err != nil {
+    //    return
+    //  }
+    //  break
+    //case Remove:
+    //  err = step.Run(ex, "Remove", step.RemoveCommands)
+    //  if err != nil {
+    //    return
+    //  }
+    //  break
     default:
-      return fmt.Errorf("invalid action type")
+      err = step.Run(ex, "", nil)
+      if err != nil {
+        return
+      }
+      //return fmt.Errorf("invalid action type")
 
     }
   }
