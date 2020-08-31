@@ -59,7 +59,7 @@ func NewExecutor(callback OutputCallback, StepsFile, VarFile string) (*Executor,
 // Run each step attached to this executor
 func (ex Executor) Run(action Action) (err error) {
 
-  ex.callback.Output("Loaded %s \n", ex.StepsFile)
+  //ex.callback.Output("Loaded %s \n", ex.StepsFile)
 
   tot := len(ex.Steps)
 

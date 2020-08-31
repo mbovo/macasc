@@ -25,7 +25,6 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
-  fmt.Fprintf(os.Stderr,"yacasc v%s.%s - %s.%s\n", Version, Build, runtime.GOOS, runtime.GOARCH)
   Execute()
 }
 
@@ -104,6 +103,7 @@ var versionCmd = &cobra.Command{
   Short: "Print version and exit",
   Long:  `Print version and exit`,
   Run: func(cmd *cobra.Command, args []string) {
+    fmt.Printf("yacasc v%s.%s - %s.%s\n", Version, Build, runtime.GOOS, runtime.GOARCH)
     os.Exit(0)
   },
 }
