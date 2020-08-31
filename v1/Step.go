@@ -33,18 +33,27 @@ func LoadStepFile(uri string, context map[string]interface{}) ([]Step, error) {
 
 func (s Step) Run(ex Executor, name string, cmdList []map[string]interface{}) error {
 
+  // iterate over command in this step
   for _, cmdMap := range s.Commands {
-    var result Result
 
+    var result Result
     found := false
+
+    // each command is a map, iterate over its values
     for cmdName, cmdArgs := range cmdMap {
+
+      // iterate over available commands, looking for the right one
       for _, cmd := range ex.Commands {
+
+        // verify if name or aliases matches
         if cmd.Is(cmdName) {
+
           ex.callback.Output("- %10s  ", cmdName)
-          result = cmd.Execute( cmdMap[cmdName] , ex.Vars, ex.callback)
-          if register, ok := cmdArgs["result"].(string); ok {
-            ex.Vars[register] = result.Info
-          }
+          // exec this command
+          result = cmd.Execute( cmdArgs , ex.Vars, ex.callback)
+
+          //todo: re-implement register variables
+
           found = true
           break
         }
