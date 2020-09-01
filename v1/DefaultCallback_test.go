@@ -2,33 +2,110 @@ package v1
 
 import (
   "os"
+  "reflect"
   "testing"
 )
 
-func TestNewDefaultCallback(t *testing.T){
-
-  table := []struct {
-    p1 *os.File
-    p2 *os.File
-    res DefaultCallback
-  } {
-    {nil,nil, DefaultCallback{
-      stdout: os.Stdout,
-      stderr: os.Stderr,
-    }},
-    { os.Stderr, os.Stdout, DefaultCallback{
-      stdout: os.Stderr,
-      stderr: os.Stdout,
-    }},
+func TestDefaultCallback_Error(t *testing.T) {
+  type fields struct {
+    stdout *os.File
+    stderr *os.File
   }
-
-  for _, test := range table {
-    cb := NewDefaultCallback(test.p1, test.p2)
-    if cb != test.res {
-      t.Errorf("Want %#v got %#v", cb, test.res)
-    }
+  type args struct {
+    format string
+    a      []interface{}
   }
+  tests := []struct {
+    name   string
+    fields fields
+    args   args
+  }{
+    // TODO: Add test cases.
+  }
+  for _, tt := range tests {
+    t.Run(tt.name, func(t *testing.T) {})
+  }
+}
 
+func TestDefaultCallback_Header(t *testing.T) {
+  type fields struct {
+    stdout *os.File
+    stderr *os.File
+  }
+  type args struct {
+    format string
+    a      []interface{}
+  }
+  tests := []struct {
+    name   string
+    fields fields
+    args   args
+  }{
+    // TODO: Add test cases.
+  }
+  for _, tt := range tests {
+    t.Run(tt.name, func(t *testing.T) {})
+  }
+}
 
+func TestDefaultCallback_Output(t *testing.T) {
+  type fields struct {
+    stdout *os.File
+    stderr *os.File
+  }
+  type args struct {
+    format string
+    a      []interface{}
+  }
+  tests := []struct {
+    name   string
+    fields fields
+    args   args
+  }{
+    // TODO: Add test cases.
+  }
+  for _, tt := range tests {
+    t.Run(tt.name, func(t *testing.T) {})
+  }
+}
 
+func TestDefaultCallback_Result(t *testing.T) {
+  type fields struct {
+    stdout *os.File
+    stderr *os.File
+  }
+  type args struct {
+    r Result
+  }
+  tests := []struct {
+    name   string
+    fields fields
+    args   args
+  }{
+    // TODO: Add test cases.
+  }
+  for _, tt := range tests {
+    t.Run(tt.name, func(t *testing.T) {})
+  }
+}
+
+func TestNewDefaultCallback(t *testing.T) {
+  type args struct {
+    out *os.File
+    err *os.File
+  }
+  tests := []struct {
+    name string
+    args args
+    want OutputCallback
+  }{
+    // TODO: Add test cases.
+  }
+  for _, tt := range tests {
+    t.Run(tt.name, func(t *testing.T) {
+      if got := NewDefaultCallback(tt.args.out, tt.args.err); !reflect.DeepEqual(got, tt.want) {
+        t.Errorf("NewDefaultCallback() = %v, want %v", got, tt.want)
+      }
+    })
+  }
 }
