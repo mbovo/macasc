@@ -9,6 +9,7 @@ import (
   "strings"
 
   "github.com/spf13/cobra"
+  "gopkg.in/yaml.v2"
 
   v1 "github.com/mbovo/yacasc/v1"
 )
@@ -42,10 +43,8 @@ func init() {
   log.SetOutput(os.Stderr)
   rootCmd.AddCommand(helpCmd)
   rootCmd.AddCommand(verifyCmd)
-  rootCmd.AddCommand(addCmd)
-  rootCmd.AddCommand(applyCmd)
-  rootCmd.AddCommand(configureCmd)
-  rootCmd.AddCommand(removeCmd)
+  rootCmd.AddCommand(runCmd)
+  rootCmd.AddCommand(printCmd)
   rootCmd.AddCommand(listCmd)
   rootCmd.AddCommand(versionCmd)
 }
@@ -70,24 +69,16 @@ func run(cmd *cobra.Command, args []string) {
   }
 
   switch cmd.Use {
-  case "add":
-    e = executor.Run(v1.Apply)
+  case "run":
+    e = executor.Run()
     break
-  case "apply":
-    e = executor.Run(v1.Verify)
-    if e != nil {
-      log.Fatal(e)
-    }
-    e = executor.Run(v1.Apply)
-    break
-  case "configure":
-    e = executor.Run(v1.Configure)
-    break
+  case "print":
+    y, _ := yaml.Marshal(executor.Vars)
+    fmt.Printf("%s\n", y)
+    y, _ = yaml.Marshal(executor.Steps)
+    fmt.Printf("#############################################################################\n%s\n", y)
   case "verify":
-    e = executor.Run(v1.Verify)
-    break
-  case "remove":
-    e = executor.Run(v1.Remove)
+    log.Printf("Not Yet implemented")
   default:
     log.Printf("Unknown command %s\n", cmd.Use)
     break
@@ -151,30 +142,17 @@ var verifyCmd = &cobra.Command{
   Run:   run,
 }
 
-var removeCmd = &cobra.Command{
-  Use:   "remove",
-  Short: "Remove command",
-  Long:  `Remove`,
+
+var runCmd = &cobra.Command{
+  Use:   "run",
+  Short: "Run the step file ",
+  Long:  `Execute all steps and commands in the step file given as argument`,
   Run:   run,
 }
 
-var applyCmd = &cobra.Command{
-  Use:   "apply",
-  Short: "Apply the configuration",
-  Long:  `Apply all the command defined in configuration file under "install" section`,
-  Run:   run,
-}
-
-var addCmd = &cobra.Command{
-  Use:   "add",
-  Short: "Add ",
-  Long:  `Execute add command`,
-  Run:   run,
-}
-
-var configureCmd = &cobra.Command{
-  Use:   "configure",
-  Short: "Configuration step",
-  Long:  `Configuration step`,
+var printCmd = &cobra.Command{
+  Use:   "print",
+  Short: "Print internal info",
+  Long:  `Print internal information regarding loaded vars, steps, and commands`,
   Run:   run,
 }
