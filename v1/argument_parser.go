@@ -32,6 +32,10 @@ func GetStringArrayArgument(c *Command, argumentName string) (l []string, r *Res
     for _, value := range list {
       l = append(l, value.(string))
     }
+  case []string:
+    for _, value := range v.([]string) {
+      l = append(l, value)
+    }
   default:
     return l, &Result{Type: ERROR, Error: fmt.Errorf("argument %s is of invalid type, must be []string, found %T", argumentName, t)}
   }
