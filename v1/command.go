@@ -49,7 +49,7 @@ type Command struct {
   callback OutputCallback
 }
 
-var DefaultList = []Command{
+var DefaultCommandList = []Command{
   {
     Name:    "unzip",
     Aliases: []string{"archive"},
