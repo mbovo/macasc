@@ -1,6 +1,6 @@
 # Yet Another Configurator As Code
 
-![Go](https://github.com/mbovo/yacasc/workflows/Go/badge.svg?branch=master)
+![Go](https://github.com/mbovo/yacasc/workflows/Go/badge.svg)
 
 A little golang tool that try to implement "as code" approach 
  
