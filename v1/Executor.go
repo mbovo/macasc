@@ -21,6 +21,7 @@ type ExecutorBuilder struct {
   cb       OutputCallback
   varFile  string
   stepFile string
+  steps    []Step
   cmds     []Command
 }
 
@@ -44,9 +45,24 @@ func (eb *ExecutorBuilder) AddCallback( cb OutputCallback) *ExecutorBuilder{
   return eb
 }
 
+func (eb *ExecutorBuilder) AddStepsFromArgs( args []string) *ExecutorBuilder{
+
+  v := make([]map[string]map[string]interface{},1)
+  v[0] = map[string]map[string]interface{}{ args[0]: {args[1]: args[2:]} }
+  s := make([]Step,1)
+  s[0] = Step{
+    Name:     "CLI",
+    Vars:     nil,
+    Commands: v,
+  }
+  eb.steps = s
+  fmt.Printf("%+v\n",s)
+  return eb
+}
+
 func (eb *ExecutorBuilder) Build() (*Executor, error) {
 
-  if eb.stepFile == "" {
+  if eb.steps == nil &&  eb.stepFile == "" {
     return nil, fmt.Errorf("invalid data, ExecutorBuilder needs a step file")
   }
 
@@ -55,9 +71,12 @@ func (eb *ExecutorBuilder) Build() (*Executor, error) {
   return nil, e
   }
 
-  s, e := LoadStepFile(eb.stepFile, v)
-  if e != nil {
-  return nil, e
+  s := eb.steps
+  if eb.steps == nil {
+    s, e = LoadStepFile(eb.stepFile, v)
+    if e != nil {
+      return nil, e
+    }
   }
 
   return NewExecutor(eb.cb, v, s, eb.cmds)
@@ -87,8 +106,6 @@ func NewExecutor(callback OutputCallback, v Vars, s []Step, cmds []Command) (*Ex
 
 // Run each step attached to this executor
 func (ex Executor) Run() (err error) {
-
-  ex.callback.Output("Loaded %s \n", ex.StepsFile)
 
   tot := len(ex.Steps)
 
