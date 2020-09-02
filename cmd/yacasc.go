@@ -30,10 +30,14 @@ func main() {
   Execute()
 }
 
-func Execute() {
-  if err := rootCmd.Execute(); err != nil {
-    log.Fatal(err)
+func must(e error){
+  if e != nil {
+    log.Fatal(e)
   }
+}
+
+func Execute() {
+  must(rootCmd.Execute())
 }
 
 func init() {
@@ -58,19 +62,20 @@ func initConfig() {
 
 func run(cmd *cobra.Command, args []string) {
   if len(args) < 1 {
-    log.Fatal("Empty stepFile, please provide a valid filename or uri")
+    must(fmt.Errorf("empty stepFile, please provide a valid filename or uri"))
   }
 
-  var e error
-  executor, e := v1.NewExecutor(v1.NewDefaultCallback(nil, nil) , args[0], varFile)
-
-  if e != nil {
-    log.Fatal(e)
-  }
+  builder := &v1.ExecutorBuilder{}
+  builder.AddStepsFromFile(args[0])
+  builder.AddVarsFromFile(varFile)
+  builder.AddCommands(v1.DefaultCommandList)
+  builder.AddCallback(v1.NewDefaultCallback(nil,nil))
+  executor, e := builder.Build()
+  must(e)
 
   switch cmd.Use {
   case "run":
-    e = executor.Run()
+    must(executor.Run())
     break
   case "print":
     y, _ := yaml.Marshal(executor.Vars)
@@ -82,10 +87,6 @@ func run(cmd *cobra.Command, args []string) {
   default:
     log.Printf("Unknown command %s\n", cmd.Use)
     break
-  }
-
-  if e != nil {
-    log.Fatal(e)
   }
 
 }
@@ -113,7 +114,7 @@ var helpCmd = & cobra.Command{
   Args: cobra.MinimumNArgs(1),
   Run: func(cmd *cobra.Command, args []string){
     cmdName := args[0]
-    for _, comm := range v1.DefaultList {
+    for _, comm := range v1.DefaultCommandList {
       if strings.EqualFold(cmdName, comm.Name){
         fmt.Fprintf(os.Stderr,"[%s]\t\t%s\n", comm.Name, comm.Help)
         for argName, argHelp := range comm.Args {
@@ -128,7 +129,7 @@ var helpCmd = & cobra.Command{
 }
 
 func listCommands (cmd *cobra.Command, args []string) {
-  cmds := v1.DefaultList
+  cmds := v1.DefaultCommandList
   fmt.Fprintln(os.Stderr,"Available Commands:")
   for _, cmd := range cmds {
     fmt.Fprintf(os.Stderr,"  %10s\t%s\n", cmd.Name, cmd.Help)
