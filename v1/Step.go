@@ -1,22 +1,19 @@
 package v1
 
 import (
+  "strings"
+
+  "gopkg.in/flosch/pongo2.v3"
   "gopkg.in/yaml.v2"
 
   "github.com/mbovo/yacasc/v1/internal"
 )
 
 // Step is a single logical named entity
-//	Add 				will group all Command to perform in order to change the target system
-//	Verify			will group all Command that verify the status of the system in order to choose which changes to made
-//	Remove			will group all Command required to rollback the target system
-//	Configure 	will group all Command required to configure the target system after Adding changes
 type Step struct {
-  Name              string
-  AddCommands       []map[string]interface{} `yaml:"add"`
-  RemoveCommands    []map[string]interface{} `yaml:"remove"`
-  VerifyCommands    []map[string]interface{} `yaml:"verify"`
-  ConfigureCommands []map[string]interface{} `yaml:"configure"`
+  Name     string
+  Vars     map[string]interface{}
+  Commands []map[string]map[string]interface{} `yaml:"cmds"`
 }
 
 // Load steps from file (local or remote), context is a map of variables to resolve
@@ -26,7 +23,20 @@ func LoadStepFile(uri string, context map[string]interface{}) ([]Step, error) {
   if e != nil {
     return s, e
   }
-  tpl, e := internal.Template(string(data), context)
+
+  e = yaml.Unmarshal(data, &s)
+
+  ctx := make(map[string]interface{})
+  for k, v := range context{
+    ctx[k] = v
+  }
+  for _, step := range s {
+    for k, v := range step.Vars{
+      ctx[k] = v
+    }
+  }
+
+  tpl, e := internal.Template(string(data),ctx )
   if e != nil {
     return s, e
   }
@@ -38,36 +48,89 @@ func LoadStepFile(uri string, context map[string]interface{}) ([]Step, error) {
   return s, nil
 }
 
-func (s Step)Run(ex Executor, name string, cmdList []map[string]interface{}) error {
+func (s Step) Run(ex Executor) error {
 
-  for _, cmdStr := range cmdList {
+  // iterate over command in this step
+  for _, cmdMap := range s.Commands {
+
     var result Result
-    if cmdName, ok := cmdStr["name"].(string); ok {
+    found := false
 
-      found := false
+    // each command is a map, iterate over its values
+    for cmdName, cmdArgs := range cmdMap {
+
+      // iterate over available commands, looking for the right one
       for _, cmd := range ex.Commands {
-        if cmd.Is(cmdName) {
-          ex.callback.Output("- %10s  ", cmdName)
-          result = cmd.Execute(cmdStr, ex.Vars, ex.callback)
 
-          if varName, ok := cmdStr["result"].(string); ok {
-            ex.Vars[varName] = result.Info
+        // verify if name or aliases matches
+        if cmd.Is(cmdName) {
+
+          ex.callback.Output("- %10s  ", cmdName)
+          // this command must be skipped?
+          if r, ok := mustSkip(cmdMap, ex); ok{
+            result = r
+            goto skip
           }
+
+          // exec this command
+          result = cmd.Execute( cmdArgs , ex.Vars, ex.callback)
+
+          // optionally register output var
+          registerVar(ex, cmdMap, result)
           found = true
           break
         }
-      }
 
+        //Workaround: jump out if the "command" is "opts"
+        if strings.EqualFold(cmdName, "opts") {
+          found = true
+          continue
+        }
+      }
       if !found {
         ex.callback.Error("command %s not found", cmdName)
       }
-
-    } else {
-      ex.callback.Error("cannot decode command name for %#v", cmdStr)
-      continue
     }
-    ex.callback.Result(result)
 
+  skip:
+    ex.callback.Result(result)
   }
   return nil
+}
+
+func registerVar(ex Executor, cmdMap map[string]map[string]interface{}, result Result) {
+  // if opts.register is defined, save the result in global vars
+  if opts, ok := cmdMap["opts"]; ok {
+    if varName, ok := opts["register"]; ok {
+      ex.Vars[varName.(string)] = result.Info
+    }
+  }
+}
+
+
+func mustSkip(cmdMap map[string]map[string]interface{}, ex Executor) (result Result, ok bool){
+
+  if opts, ok := cmdMap["opts"]; ok {
+    if condition, ok := opts["when"]; ok {
+
+      switch condition.(type) {
+      case bool:
+        if !condition.(bool) {
+          result.Type = SKIPPED
+          return result, true
+        }
+      case string:
+        r, err := internal.Template(condition.(string), pongo2.Context(ex.Vars))
+        if err != nil {
+          ex.callback.Error("%s\n", err)
+          return Result{}, false
+        }
+        if strings.EqualFold(r,"false") || strings.EqualFold(r, ""){
+          result.Type = SKIPPED
+          return result, true
+        }
+      }
+    }
+  }
+  return result, false
 }

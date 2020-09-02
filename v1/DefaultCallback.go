@@ -36,7 +36,7 @@ func (d DefaultCallback) Output(format string, a ...interface{}) {
 }
 
 func (d DefaultCallback) Error(format string, a ...interface{}) {
-  _, err := fmt.Fprintf(d.stderr, format, color.Error.Render(a...))
+  _, err := fmt.Fprintf(d.stderr, color.Error.Render(format), a...)
   if err != nil {
     panic(err)
   }
@@ -48,30 +48,25 @@ func (d DefaultCallback) Header(format string, a ...interface{}){
 
 func (d DefaultCallback) Result(r Result) {
 
-  red := color.Style{color.Red, color.OpBold}.Render
-  green := color.Style{color.Green, color.OpBold}.Render
-  yellow := color.Style{color.Yellow, color.OpBold}.Render
   c := color.FgDefault.Render
-
-  substr := strings.ReplaceAll(r.Message, "\n", "\\n")
-
   switch r.Type {
   case ERROR:
-    c = red
+    c = color.Style{color.Red, color.OpBold}.Render
   case OK:
-    c = green
+    c = color.Style{color.Blue, color.OpBold}.Render
   case CHANGED:
-    c = yellow
+    c = color.Style{color.Yellow, color.OpBold}.Render
+  case SKIPPED:
+    c = color.Style{color.Cyan, color.OpBold}.Render
   }
 
+  substr := strings.ReplaceAll(r.Message, "\n", "\\n")
   d.Output("[%7s]  %s\n", c(r.Type), color.Secondary.Render(substr))
 
   if r.Error != nil {
     d.Error("%20s %s\n", "", r.Error)
   }
-  //if r.Message != "" {
-  //	d.Output("\t%s\n", r.Message)
-  //}
+
   if r.Info != nil {
     for key, item := range r.Info {
       d.Output("%20s %s\t%s\n", "", color.Secondary.Render(key), color.Secondary.Render(item))

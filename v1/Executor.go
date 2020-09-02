@@ -1,9 +1,5 @@
 package v1
 
-import (
-  "fmt"
-)
-
 // Keep track of current execution
 //	VarFile is the vars filename (can be a remote url)
 //	StepsFile is the steps filename ( can be a remote url)
@@ -19,17 +15,6 @@ type Executor struct {
   Commands  []Command
 }
 
-// An action type
-type Action uint8
-
-// Different actions
-const (
-  Verify Action = 1 * iota
-  Apply
-  Configure
-  Remove
-)
-
 // Returns executor object loading Steps and Vars from given filenames
 // It accept a callback function in order to write back status to UX
 func NewExecutor(callback OutputCallback, StepsFile, VarFile string) (*Executor, error) {
@@ -42,6 +27,13 @@ func NewExecutor(callback OutputCallback, StepsFile, VarFile string) (*Executor,
   s, e := LoadStepFile(StepsFile, v)
   if e != nil {
     return nil, e
+  }
+
+  // add vars declared on each step to global vars
+  for _, steps := range s {
+    for key, value := range steps.Vars {
+      v[key] = value
+    }
   }
 
   ex := Executor{
@@ -57,45 +49,19 @@ func NewExecutor(callback OutputCallback, StepsFile, VarFile string) (*Executor,
 }
 
 // Run each step attached to this executor
-func (ex Executor) Run(action Action) (err error) {
+func (ex Executor) Run() (err error) {
 
   //ex.callback.Output("Loaded %s \n", ex.StepsFile)
 
   tot := len(ex.Steps)
 
   for i, step := range ex.Steps {
-
     ex.callback.Output("Step %d/%d: %s\n", i+1, tot, step.Name)
-
-    switch action {
-    case Verify:
-      err = step.Run(ex, "Verify", step.VerifyCommands)
-      if err != nil {
-        return
-      }
-      break
-    case Apply:
-      err = step.Run(ex, "Add", step.AddCommands)
-      if err != nil {
-        return
-      }
-      break
-    case Configure:
-      err = step.Run(ex, "Configure", step.ConfigureCommands)
-      if err != nil {
-        return
-      }
-      break
-    case Remove:
-      err = step.Run(ex, "Remove", step.RemoveCommands)
-      if err != nil {
-        return
-      }
-      break
-    default:
-      return fmt.Errorf("invalid action type")
-
+    err = step.Run(ex)
+    if err != nil {
+      return
     }
   }
+
   return err
 }
