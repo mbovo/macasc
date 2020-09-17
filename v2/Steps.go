@@ -2,6 +2,8 @@ package v2
 
 import (
   "gopkg.in/yaml.v2"
+
+  "github.com/mbovo/yacasc/v2/command"
 )
 
 type Step interface {
@@ -12,7 +14,7 @@ type Step interface {
 
 type step struct{}
 
-func (s step) Run(vars VarMap, cb OutCallback) {
+func (s step) Run(vars command.VarMap, cb command.OutCallback) {
   panic("implement me")
 }
 

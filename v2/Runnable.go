@@ -1,13 +1,9 @@
 package v2
 
+import (
+  "github.com/mbovo/yacasc/v2/command"
+)
+
 type Runnable interface {
-  Run(vars VarMap, cb OutCallback)
-}
-
-type JobRunner struct {
-  
-}
-
-func (j JobRunner) Run(vars VarMap, cb OutCallback) {
-  panic("implement me")
+  Run(vars command.VarMap, cb command.OutCallback)
 }

@@ -173,13 +173,13 @@ var verifyCmd = &cobra.Command{
 var runCmd = &cobra.Command{
   Use:   "run",
   Short: "Run the step file ",
-  Long:  `Execute all steps and commands in the step file given as argument`,
+  Long:  `Execute all steps and command in the step file given as argument`,
   Run:   run,
 }
 
 var printCmd = &cobra.Command{
   Use:   "print",
   Short: "Print internal info",
-  Long:  `Print internal information regarding loaded vars, steps, and commands`,
+  Long:  `Print internal information regarding loaded vars, steps, and command`,
   Run:   run,
 }

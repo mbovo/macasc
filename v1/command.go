@@ -121,7 +121,7 @@ var DefaultCommandList = []Command{
   {
     Name:    "shell",
     Aliases: []string{"Shell", "sh", "bash"},
-    Help:    "Execute commands using default shell",
+    Help:    "Execute command using default shell",
     Args: map[string]string{
       "args": "A list of arguments",
       "cwd":  "change working directory",

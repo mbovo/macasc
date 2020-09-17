@@ -59,7 +59,7 @@ func (s Step) Run(ex Executor) error {
     // each command is a map, iterate over its values
     for cmdName, cmdArgs := range cmdMap {
 
-      // iterate over available commands, looking for the right one
+      // iterate over available command, looking for the right one
       for _, cmd := range ex.Commands {
 
         // verify if name or aliases matches

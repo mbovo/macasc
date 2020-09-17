@@ -1,18 +1,5 @@
 package v2
 
-import (
-  "gopkg.in/yaml.v2"
-)
-
-type VarMap interface {
-  Add(string, interface{})
-  Remove(string)
-  Get(string) interface{}
-  Template(string) (string, error)
-  yaml.Marshaler
-  yaml.Unmarshaler
-}
-
 type varmap struct {}
 
 func (v varmap) Add(s string, i interface{}) {
