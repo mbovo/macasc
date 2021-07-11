@@ -1,7 +1,7 @@
 package v1
 
 import (
-  "fmt"
+	"fmt"
 )
 
 // Keep track of current execution
@@ -11,111 +11,110 @@ import (
 //	Vars contains currently loaded vars
 //	Commands must be a list of valid command.Command
 type Executor struct {
-  callback OutputCallback
-  Steps    []Step
-  Vars     Vars
-  Commands []Command
+	callback OutputCallback
+	Steps    []Step
+	Vars     Vars
+	Commands []Command
 }
 
 type ExecutorBuilder struct {
-  cb       OutputCallback
-  varFile  string
-  stepFile string
-  steps    []Step
-  cmds     []Command
+	cb       OutputCallback
+	varFile  string
+	stepFile string
+	steps    []Step
+	cmds     []Command
 }
 
-func (eb *ExecutorBuilder) AddStepsFromFile( filename string) *ExecutorBuilder{
-  eb.stepFile = filename
-  return eb
+func (eb *ExecutorBuilder) AddStepsFromFile(filename string) *ExecutorBuilder {
+	eb.stepFile = filename
+	return eb
 }
 
-func (eb *ExecutorBuilder) AddVarsFromFile( filename string ) *ExecutorBuilder{
-  eb.varFile = filename
-  return eb
+func (eb *ExecutorBuilder) AddVarsFromFile(filename string) *ExecutorBuilder {
+	eb.varFile = filename
+	return eb
 }
 
-func (eb *ExecutorBuilder) AddCommands( cmds []Command) *ExecutorBuilder {
-  eb.cmds = cmds
-  return eb
+func (eb *ExecutorBuilder) AddCommands(cmds []Command) *ExecutorBuilder {
+	eb.cmds = cmds
+	return eb
 }
 
-func (eb *ExecutorBuilder) AddCallback( cb OutputCallback) *ExecutorBuilder{
-  eb.cb = cb
-  return eb
+func (eb *ExecutorBuilder) AddCallback(cb OutputCallback) *ExecutorBuilder {
+	eb.cb = cb
+	return eb
 }
 
-func (eb *ExecutorBuilder) AddStepsFromArgs( args []string) *ExecutorBuilder{
+func (eb *ExecutorBuilder) AddStepsFromArgs(args []string) *ExecutorBuilder {
 
-  v := make([]map[string]map[string]interface{},1)
-  v[0] = map[string]map[string]interface{}{ args[0]: {args[1]: args[2:]} }
-  s := make([]Step,1)
-  s[0] = Step{
-    Name:     "CLI",
-    Vars:     nil,
-    Commands: v,
-  }
-  eb.steps = s
-  fmt.Printf("%+v\n",s)
-  return eb
+	v := make([]map[string]map[string]interface{}, 1)
+	v[0] = map[string]map[string]interface{}{args[0]: {args[1]: args[2:]}}
+	s := make([]Step, 1)
+	s[0] = Step{
+		Name:     "CLI",
+		Vars:     nil,
+		Commands: v,
+	}
+	eb.steps = s
+	fmt.Printf("%+v\n", s)
+	return eb
 }
 
 func (eb *ExecutorBuilder) Build() (*Executor, error) {
 
-  if eb.steps == nil &&  eb.stepFile == "" {
-    return nil, fmt.Errorf("invalid data, ExecutorBuilder needs a step file")
-  }
+	if eb.steps == nil && eb.stepFile == "" {
+		return nil, fmt.Errorf("invalid data, ExecutorBuilder needs a step file")
+	}
 
-  v, e := LoadVarFile(eb.varFile)
-  if e != nil {
-  return nil, e
-  }
+	v, e := LoadVarFile(eb.varFile)
+	if e != nil {
+		return nil, e
+	}
 
-  s := eb.steps
-  if eb.steps == nil {
-    s, e = LoadStepFile(eb.stepFile, v)
-    if e != nil {
-      return nil, e
-    }
-  }
+	s := eb.steps
+	if eb.steps == nil {
+		s, e = LoadStepFile(eb.stepFile, v)
+		if e != nil {
+			return nil, e
+		}
+	}
 
-  return NewExecutor(eb.cb, v, s, eb.cmds)
+	return NewExecutor(eb.cb, v, s, eb.cmds)
 }
-
 
 // Returns executor object loading Steps and Vars from given filenames
 // It accept a callback function in order to write back status to UX
 func NewExecutor(callback OutputCallback, v Vars, s []Step, cmds []Command) (*Executor, error) {
 
-  // add vars declared on each step to global vars
-  for _, steps := range s {
-    for key, value := range steps.Vars {
-      v[key] = value
-    }
-  }
+	// add vars declared on each step to global vars
+	for _, steps := range s {
+		for key, value := range steps.Vars {
+			v[key] = value
+		}
+	}
 
-  ex := Executor{
-    callback: callback,
-    Vars:     v,
-    Steps:    s,
-    Commands: cmds,
-  }
+	ex := Executor{
+		callback: callback,
+		Vars:     v,
+		Steps:    s,
+		Commands: cmds,
+	}
 
-  return &ex, nil
+	return &ex, nil
 }
 
 // Run each step attached to this executor
 func (ex Executor) Run() (err error) {
 
-  tot := len(ex.Steps)
+	tot := len(ex.Steps)
 
-  for i, step := range ex.Steps {
-    ex.callback.Output("Step %d/%d: %s\n", i+1, tot, step.Name)
-    err = step.Run(ex)
-    if err != nil {
-      return
-    }
-  }
+	for i, step := range ex.Steps {
+		ex.callback.Output("Step %d/%d: %s\n", i+1, tot, step.Name)
+		err = step.Run(ex)
+		if err != nil {
+			return
+		}
+	}
 
-  return err
+	return err
 }

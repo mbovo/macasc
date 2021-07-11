@@ -1,45 +1,47 @@
 package v1
 
 import (
-  "strings"
+	"strings"
 
-  "github.com/mbovo/yacasc/v1/internal"
+	"github.com/mbovo/yacasc/v1/internal"
 )
-
 
 func Brew(c *Command) Result {
 
-  cmd, r := GetStringArgument(c, "cmd")
-  if r != nil { return *r}
-  args, r := GetStringArrayArgument(c, "args")
+	cmd, r := GetStringArgument(c, "cmd")
+	if r != nil {
+		return *r
+	}
+	args, r := GetStringArrayArgument(c, "args")
 
-  retVal := Result{Type: CHANGED}
+	retVal := Result{Type: CHANGED}
 
-  //TODO: return stderr and stdout content and write it to retVal.Info
-  if err := BrewAction(strings.ToLower(cmd), args, c.callback); err != nil {
-    retVal.Error = err
-    retVal.Type = ERROR
-  }
+	//TODO: return stderr and stdout content and write it to retVal.Info
+	if err := BrewAction(strings.ToLower(cmd), args, c.callback); err != nil {
+		retVal.Error = err
+		retVal.Type = ERROR
+	}
 
-  return retVal
+	return retVal
 }
 
-func BrewAction(command string, list []string, callback OutputCallback ) error {
+func BrewAction(command string, list []string, callback OutputCallback) error {
 
-  brewBin, ok := internal.ExistsInPath("brew")
-  if !ok {
-    //trying without abs location
-    brewBin = "brew"
-  }
+	brewBin, ok := internal.ExistsInPath("brew")
+	if !ok {
+		//trying without abs location
+		brewBin = "brew"
+	}
 
-  for _, formula := range list {
-    callback.Output("%s", formula)
-    if _, err := internal.Exec(true, brewBin, command, formula ); err != nil {
-      return err
-    }
-  }
-  return nil
+	for _, formula := range list {
+		callback.Output("%s", formula)
+		if _, err := internal.Exec(true, brewBin, command, formula); err != nil {
+			return err
+		}
+	}
+	return nil
 }
+
 //
 //func preFetch(formule []string) (int, error) {
 //	s := []string{"fetch"}
